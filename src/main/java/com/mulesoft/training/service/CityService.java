@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.mulesoft.training.bean.City;
+import com.mulesoft.training.bean.CityNames;
 import com.mulesoft.training.dao.CityRepository;
 import com.mulesoft.training.dao.WindRepository;
 import com.mulesoft.training.exception.ResourceNotFoundException;
@@ -40,8 +41,8 @@ public class CityService  implements ICityService{
 
 	@Override
 	public City addCity(@Valid City city) {
+		validateCityName(city.getCityName().toUpperCase());
 		validateCity(city.getCityName());	//validate cityName
-		validateID(city.getCityId());	//validate Id
 		validateLongitudeAndLattitude(city.getLongitude(),city.getLattitude());	//validate longitude and lattitude
 		City entity = cityRepository.save(city);
 		return entity;		
@@ -100,6 +101,16 @@ public class CityService  implements ICityService{
 		}
 		
 	}
+	
+	//validate cityName with list of names
+		public boolean validateCityName(String cityName) {
+			if(CityNames.contains(cityName)) {
+				return true;
+			}
+			else {
+				throw new Validation("CityName is not Valid");
+			}
+		}
 
 	
 	

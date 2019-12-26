@@ -42,7 +42,6 @@ public class WeatherController {
 	@Autowired  
 	private IWindService windService;
 	
-	
 	@GetMapping("/city")
     public ResponseEntity<List<City>> getAllCities() {
 		List<City> result = cityService.findAllCitites();
@@ -58,7 +57,7 @@ public class WeatherController {
 		}
 		catch(ResourceNotFoundException error){
 			return new ResponseEntity<String>(
-		    		error.getMessage(),HttpStatus.OK);
+		    		error.getMessage(),HttpStatus.NOT_FOUND);
 		}				
 	}
 
@@ -118,19 +117,13 @@ public class WeatherController {
 	 @GetMapping("/city/{cityName}/showRecord")
 	    public ResponseEntity<?> getAllWindRateByCityName(@PathVariable (value = "cityName") String cityName,@RequestParam(required = false) String unit) {
 		 	try {
-		 		List<Wind> result;
-		 		if(unit!=null) {
-					result = windService.convertAllCitiesWindRate(unit);
-		 		}
-		 		else {
-			 		result = windService.findByCityName(cityName);
-		 		}
+		 		List<Wind> result = windService.findByCityName(cityName,unit);
 		 		return new ResponseEntity<List<Wind>>(
 	        		result,HttpStatus.OK);
 		 	}
 		 	catch (ResourceNotFoundException error) {
 		 		return new ResponseEntity<String>(
-		        		error.getMessage(),HttpStatus.BAD_REQUEST);
+		        		error.getMessage(),HttpStatus.NOT_FOUND);
 			}
 	  }
 	 
@@ -143,7 +136,7 @@ public class WeatherController {
 		 	}
 		 	catch (ResourceNotFoundException error) {
 		 		return new ResponseEntity<String>(
-		        		error.getMessage(),HttpStatus.BAD_REQUEST);
+		        		error.getMessage(),HttpStatus.NOT_FOUND);
 			}
 	  }
 	 
@@ -228,7 +221,7 @@ public class WeatherController {
 			}
 			catch(ResourceNotFoundException error) {
 				return new ResponseEntity<String>(
-				error.getMessage(),HttpStatus.BAD_REQUEST);
+				error.getMessage(),HttpStatus.NOT_FOUND);
 			}
 		}
 	 

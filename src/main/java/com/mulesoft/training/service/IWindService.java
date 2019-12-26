@@ -13,7 +13,7 @@ import com.mulesoft.training.bean.Wind;
 
 public interface IWindService {
 
-	public List<Wind> findByCityName(String cityName);
+	public List<Wind> findByCityName(String cityName,String unit);
 
 	public Wind findByCityNameAndDate(String cityName, Date date);
 
@@ -27,9 +27,6 @@ public interface IWindService {
 
 	public List<Wind> convertAllCitiesWindRate(String unit);
 
-	public List<Wind> findAllDataOfWind();
-
-
-	
+	public List<Wind> findAllDataOfWind();	
 
 }

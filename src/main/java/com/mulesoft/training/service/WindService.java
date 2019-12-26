@@ -5,6 +5,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EnumType;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -14,10 +15,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.mulesoft.training.bean.City;
+import com.mulesoft.training.bean.CityNames;
 import com.mulesoft.training.bean.Wind;
 import com.mulesoft.training.dao.CityRepository;
 import com.mulesoft.training.dao.WindRepository;
 import com.mulesoft.training.exception.ResourceNotFoundException;
+import com.mulesoft.training.exception.Validation;
 
 @Service
 @Transactional
@@ -42,13 +45,17 @@ public class WindService implements IWindService{
 	}
 	
 	@Override
-	public List<Wind> findByCityName(String cityName) {
-		List<Wind> result = windRepository.findByCityName(cityName);
-		if(!result.isEmpty() ) {
-			return result;
+	public List<Wind> findByCityName(String cityName,String unit) {
+		List<Wind> data = windRepository.findByCityName(cityName);
+		if(data.isEmpty()) {
+			throw new ResourceNotFoundException("CityName " + cityName + " Not Found.");
 		}
 		else {
-			throw new ResourceNotFoundException("CityName " + cityName + " Not Found.");
+			if(unit==null) {
+				return data;
+			}
+			data = convertData(data, unit);
+			return data;
 		}
 	}
 	
@@ -65,7 +72,7 @@ public class WindService implements IWindService{
 
 	@Override
 	public Wind addWindRecord(String cityName, Wind wind) throws DataIntegrityViolationException {
-	
+		
 		return cityRepository.findByCityName(cityName).map(city -> {
 			wind.setCity(city);		
             return windRepository.save(wind);
@@ -129,7 +136,10 @@ public class WindService implements IWindService{
 
 	private List<Wind> convertData(List<Wind> data, String unit) {
 		List<Wind> new_data = new ArrayList<Wind>(data.size());
-		if(unit.equalsIgnoreCase("km_hr")) {
+		if(unit.equalsIgnoreCase("m_s")) {
+			return data;
+		}
+		else if(unit.equalsIgnoreCase("km_hr")) {
 			for (Wind wind : data) {
 				Wind entity = new Wind();
 				double km_hr = (double) (3.6 * wind.getWindRate());
@@ -139,9 +149,6 @@ public class WindService implements IWindService{
 				entity.setWindRate(km_hr);				
 				new_data.add(entity);
 			}
-		}
-		else if(unit.equalsIgnoreCase("m_s")) {
-			return data;
 		}
 		else if(unit.equalsIgnoreCase("m_hr")) {
 			for (Wind wind : data) {
@@ -156,10 +163,9 @@ public class WindService implements IWindService{
 			}
 		}
 		else {
-			throw new ResourceNotFoundException("No conversion for unit.");
+			throw new ResourceNotFoundException("unit is not valid");
 		}
 		return new_data;
 	}
 
-	
 }
